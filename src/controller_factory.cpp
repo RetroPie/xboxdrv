@@ -27,6 +27,7 @@
 #include "saitek_p3600_controller.hpp"
 #include "xbox360_controller.hpp"
 #include "xbox360_wireless_controller.hpp"
+#include "xboxone_wired_controller.hpp"
 #include "xbox_controller.hpp"
 
 ControllerPtr
@@ -58,7 +59,11 @@ ControllerFactory::create(const XPadDevice& dev_type, libusb_device* dev, const 
       break;
 
     case GAMEPAD_XBOX360_WIRELESS:
-      return ControllerPtr(new Xbox360WirelessController(dev, opts.wireless_id, opts.detach_kernel_driver));
+      return ControllerPtr(new Xbox360WirelessController(dev, opts.chatpad, opts.wireless_id,
+                                                         opts.detach_kernel_driver));
+
+    case GAMEPAD_XBOXONE:
+      return ControllerPtr(new XboxOneWiredController(dev, opts.wireless_id, opts.detach_kernel_driver));
 
     case GAMEPAD_FIRESTORM:
       return ControllerPtr(new FirestormDualController(dev, false, opts.detach_kernel_driver));
@@ -121,8 +126,13 @@ ControllerFactory::create_multiple(const XPadDevice& dev_type, libusb_device* de
     case GAMEPAD_XBOX360_WIRELESS:
       for(int wireless_id = 0; wireless_id < 4; ++wireless_id)
       {
-        lst.push_back(ControllerPtr(new Xbox360WirelessController(dev, wireless_id, opts.detach_kernel_driver)));
+        lst.push_back(ControllerPtr(new Xbox360WirelessController(dev, opts.chatpad, wireless_id,
+                                                                  opts.detach_kernel_driver)));
       }
+      break;
+
+    case GAMEPAD_XBOXONE:
+      lst.push_back(ControllerPtr(new XboxOneWiredController(dev, opts.wireless_id, opts.detach_kernel_driver)));
       break;
 
     case GAMEPAD_FIRESTORM:
@@ -136,7 +146,7 @@ ControllerFactory::create_multiple(const XPadDevice& dev_type, libusb_device* de
     case GAMEPAD_SAITEK_P2500:
       lst.push_back(ControllerPtr(new SaitekP2500Controller(dev, opts.detach_kernel_driver)));
       break;
-    
+
     case GAMEPAD_SAITEK_P3600:
       lst.push_back(ControllerPtr(new SaitekP3600Controller(dev, opts.detach_kernel_driver)));
       break;
